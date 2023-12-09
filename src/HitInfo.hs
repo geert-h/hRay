@@ -1,4 +1,4 @@
-module HitInfo where
+module HitInfo (HitInfo (..)) where
 
 import Material
 import Vector3
@@ -8,3 +8,4 @@ data HitInfo = HitInfo
     material :: Material,
     normal :: Vector3
   }
+  deriving (Show, Eq)

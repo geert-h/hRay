@@ -16,6 +16,9 @@ instance Num Vector3 where
   signum v = Vector3 (signum $ x v) (signum $ y v) (signum $ z v)
   fromInteger v = Vector3 (fromInteger v) (fromInteger v) (fromInteger v)
 
+maxVec :: Vector3 -> Double
+maxVec v = max (x v) (max (y v) (z v))
+
 dot :: Vector3 -> Vector3 -> Double
 l `dot` r = x l * x r + y l * y r + z l * z r
 
