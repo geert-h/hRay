@@ -1,9 +1,8 @@
-module Ray where
+module Ray (Ray (..), trace) where
 
 import Color
-import Debug.Trace (traceM, traceShowId, traceShowM)
 import HitInfo (HitInfo (..))
-import Material (Material (color, emissionColor, refType), ReflectionType (..))
+import Material (Material (..), ReflectionType (..))
 import Sphere (Sphere (Sphere, centerPosition, material))
 import System.Random (Random (randomR), newStdGen)
 import Vector3
@@ -28,44 +27,28 @@ cast world ray = case foldr closetSphere (Nothing, -1) (spheres world) of
       where
         ndist = distanceToSphere sphere ray
 
-trace :: Int -> Color -> Color -> World -> Ray -> IO Color
-trace 0 incomingLight clr _ _ = pure $ incomingLight * clr -- Maximum nr of bounces is met
-trace bounces incomingLight clr world ray = case cast world ray of
-  Nothing -> pure $ Color 0 0 0
-  Just hitInfo -> do
-    dir <- getNewBounceDirection hitInfo ray
-    trace (bounces - 1) (incomingLight + emissionColor (HitInfo.material hitInfo)) (clr * color (HitInfo.material hitInfo)) world (Ray (HitInfo.position hitInfo) dir)
-
-trace' :: Int -> World -> Ray -> IO Color
-trace' depth world ray@(Ray origin direction) = case cast world ray of
-  Nothing -> pure 0
-  Just hitInfo -> do
-    let continue f = case refType (HitInfo.material hitInfo) of
+trace :: Int -> World -> Ray -> IO Color
+trace depth world ray@(Ray origin direction) = case cast world ray of
+  Nothing -> pure $ fromDouble 0.1
+  Just (HitInfo hitPos (Material col emissionCol refType) hitNormal) -> do
+    let continue f = case refType of
           Diffuse -> do
-            newDir <- diffuseDirection $ normal hitInfo
-            newTrace <- trace' (depth + 1) world (Ray (HitInfo.position hitInfo) newDir)
-            return $ emissionColor (HitInfo.material hitInfo) + (f * newTrace)
+            newDir <- diffuseDirection hitNormal
+            newTrace <- trace (depth + 1) world (Ray hitPos newDir)
+            return $ emissionCol + (f * newTrace)
           Specular -> do
-            let newDir = specularDirection (normal hitInfo) direction
-            newTrace <- trace' (depth + 1) world (Ray (HitInfo.position hitInfo) newDir)
-            return $ emissionColor (HitInfo.material hitInfo) + (f * newTrace)
+            let newDir = specularDirection hitNormal direction
+            newTrace <- trace (depth + 1) world (Ray hitPos newDir)
+            return $ emissionCol + (f * newTrace)
           Refractive -> do undefined
     if depth + 1 > 5
       then do
+        let maxColVal = maxColorValue col
         rand <- randomValue
-        if rand < maxColorValue (color $ HitInfo.material hitInfo)
-          then continue $ color (HitInfo.material hitInfo) `mulColorByScalar` (1 / maxColorValue (color $ HitInfo.material hitInfo))
-          else return (emissionColor $ HitInfo.material hitInfo)
-      else continue $ color $ HitInfo.material hitInfo
-
-getNewBounceDirection :: HitInfo -> Ray -> IO Vector3
-getNewBounceDirection hitInfo ray = do
-  case refType $ HitInfo.material hitInfo of
-    Diffuse ->
-      diffuseDirection $ normal hitInfo
-    Specular ->
-      pure $ specularDirection (normal hitInfo) (direction ray)
-    Refractive -> pure undefined
+        if rand < maxColVal
+          then continue $ col `mulColorByScalar` (1 / maxColVal)
+          else return emissionCol
+      else continue col
 
 diffuseDirection :: Vector3 -> IO Vector3
 diffuseDirection normal = do
@@ -73,7 +56,7 @@ diffuseDirection normal = do
   pure $ normalize $ randomDir + normal
 
 specularDirection :: Vector3 -> Vector3 -> Vector3
-specularDirection normal direction = direction - normal `mulByScalar` (2 * dot direction normal)
+specularDirection normal direction = direction - normal `mulByScalar` (2 * normal `dot` direction)
 
 randomValue :: IO Double
 randomValue = do
@@ -101,6 +84,3 @@ distanceToSphere (Sphere (Vector3 cx cy cz) radius _) (Ray (Vector3 x y z) (Vect
     b = 2 * (dx * (x - cx) + dy * (y - cy) + dz * (z - cz))
     c = (x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2 - radius ** 2
     d = b ** 2 - 4 * a * c
-
-collidesWithSphere :: Sphere -> Ray -> Bool
-collidesWithSphere s r = distanceToSphere s r > 0
