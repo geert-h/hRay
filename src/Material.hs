@@ -3,11 +3,11 @@ module Material (Material (..), ReflectionType (..)) where
 import Color (Color)
 
 data Material = Material
-  { color :: Color,
-    emissionColor :: Color,
+  { color :: !Color,
+    emissionColor :: !Color,
     -- smoothness :: Double,
     -- specularStrength :: Double
-    refType :: ReflectionType
+    refType :: !ReflectionType
   }
   deriving (Eq, Show)
 

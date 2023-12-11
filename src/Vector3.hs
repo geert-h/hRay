@@ -1,9 +1,9 @@
 module Vector3 where
 
 data Vector3 = Vector3
-  { x :: Double,
-    y :: Double,
-    z :: Double
+  { x :: {-# UNPACK #-} !Double,
+    y :: {-# UNPACK #-} !Double,
+    z :: {-# UNPACK #-} !Double
   }
   deriving (Eq, Show)
 

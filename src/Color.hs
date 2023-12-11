@@ -4,9 +4,9 @@ import Codec.Picture (PixelRGB8 (PixelRGB8))
 import Data.Word (Word8)
 
 data Color = Color
-  { r :: Double,
-    g :: Double,
-    b :: Double
+  { r :: {-# UNPACK #-} !Double,
+    g :: {-# UNPACK #-} !Double,
+    b :: {-# UNPACK #-} !Double
   }
   deriving (Eq, Show)
 

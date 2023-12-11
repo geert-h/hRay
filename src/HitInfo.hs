@@ -5,7 +5,7 @@ import Vector3
 
 data HitInfo = HitInfo
   { position :: Vector3,
-    material :: Material,
-    normal :: Vector3
+    normal :: Vector3,
+    material :: Material
   }
   deriving (Show, Eq)

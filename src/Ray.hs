@@ -3,7 +3,7 @@ module Ray (Ray (..), trace) where
 import Color
 import HitInfo (HitInfo (..))
 import Material (Material (..), ReflectionType (..))
-import Sphere (Sphere (Sphere, centerPosition, material))
+import Sphere (Sphere (Sphere))
 import System.Random (Random (randomR), newStdGen)
 import Vector3
 import World
@@ -14,12 +14,22 @@ data Ray = Ray
   }
   deriving (Eq, Show)
 
+distanceToSphere :: Sphere -> Ray -> Double
+distanceToSphere (Sphere (Vector3 cx cy cz) radius _) (Ray (Vector3 x y z) (Vector3 dx dy dz))
+  | d > 0 = min (max 0 ((-b) + sqrt d / (2 * a))) (max 0 ((-b) - sqrt d / (2 * a)))
+  | otherwise = -1
+  where
+    a = dx * dx + dy * dy + dz * dz
+    b = 2 * (dx * (x - cx) + dy * (y - cy) + dz * (z - cz))
+    c = (x - cx) * (x - cx) + (y - cy) * (y - cy) + (z - cz) * (z - cz) - (radius * radius)
+    d = (b * b) - (4 * a * c)
+
 cast :: World -> Ray -> Maybe HitInfo
-cast world ray = case foldr closetSphere (Nothing, -1) (spheres world) of
+cast world ray@(Ray position direction) = case foldr closetSphere (Nothing, -1) (spheres world) of
   (Nothing, _) -> Nothing
-  (Just sphere, dist) -> Just $ HitInfo newPos (Sphere.material sphere) (normalize $ newPos - centerPosition sphere)
+  (Just (Sphere centerPos _ material), dist) -> Just $ HitInfo newPos (normalize (newPos - centerPos)) material
     where
-      newPos = Ray.position ray + direction ray `mulByScalar` dist
+      newPos = position + direction `mulByScalar` dist
   where
     closetSphere sphere (oldSphere, oldDist)
       | (ndist < oldDist || oldDist < 0) && ndist > 0 = (Just sphere, ndist)
@@ -28,27 +38,28 @@ cast world ray = case foldr closetSphere (Nothing, -1) (spheres world) of
         ndist = distanceToSphere sphere ray
 
 trace :: Int -> World -> Ray -> IO Color
-trace depth world ray@(Ray origin direction) = case cast world ray of
+trace depth world ray@(Ray _ direction) = case cast world ray of
   Nothing -> pure $ fromDouble 0.1
-  Just (HitInfo hitPos (Material col emissionCol refType) hitNormal) -> do
-    let continue f = case refType of
+  Just (HitInfo hitPos hitNormal (Material hitColor hitEmissionColor hitRefType)) -> do
+    let depth' = depth + 1
+        pr = maxColorValue hitColor
+        continue clr = case hitRefType of
           Diffuse -> do
             newDir <- diffuseDirection hitNormal
-            newTrace <- trace (depth + 1) world (Ray hitPos newDir)
-            return $ emissionCol + (f * newTrace)
+            newTrace <- trace depth' world (Ray hitPos newDir)
+            return $ hitEmissionColor + (clr * newTrace)
           Specular -> do
             let newDir = specularDirection hitNormal direction
-            newTrace <- trace (depth + 1) world (Ray hitPos newDir)
-            return $ emissionCol + (f * newTrace)
+            newTrace <- trace depth' world (Ray hitPos newDir)
+            return $ hitEmissionColor + (clr * newTrace)
           Refractive -> do undefined
-    if depth + 1 > 5
+    if depth' > 5
       then do
-        let maxColVal = maxColorValue col
         rand <- randomValue
-        if rand < maxColVal
-          then continue $ col `mulColorByScalar` (1 / maxColVal)
-          else return emissionCol
-      else continue col
+        if rand < pr
+          then continue $ hitColor `mulColorByScalar` (1 / pr)
+          else return hitEmissionColor
+      else continue hitColor
 
 diffuseDirection :: Vector3 -> IO Vector3
 diffuseDirection normal = do
@@ -76,11 +87,3 @@ randomDirection = do
   y <- randomValueNormal
   z <- randomValueNormal
   return $ normalize (Vector3 x y z)
-
-distanceToSphere :: Sphere -> Ray -> Double
-distanceToSphere (Sphere (Vector3 cx cy cz) radius _) (Ray (Vector3 x y z) (Vector3 dx dy dz)) = if d < 0 then -1 else min (max 0 ((-b) + sqrt d / (2 * a))) (max 0 ((-b) - sqrt d / (2 * a)))
-  where
-    a = dx ** 2 + dy ** 2 + dz ** 2
-    b = 2 * (dx * (x - cx) + dy * (y - cy) + dz * (z - cz))
-    c = (x - cx) ** 2 + (y - cy) ** 2 + (z - cz) ** 2 - radius ** 2
-    d = b ** 2 - 4 * a * c

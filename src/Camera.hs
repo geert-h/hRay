@@ -1,4 +1,4 @@
-module Camera where
+module Camera (Camera (..), initCamera, aspectRatio, upDirection, rightDirection, screenCentre, leftTop, leftBottom, rightTop) where
 
 import Vector3
 
@@ -10,7 +10,7 @@ data Camera = Camera
   }
 
 initCamera :: Camera
-initCamera = Camera (Vector3 (-3) 0 1) (Vector3 1 0 0) 1 (1920, 1080)
+initCamera = Camera (Vector3 (-3) 0 1) (Vector3 1 0 0) 1 (1280, 720)
 
 aspectRatio :: Camera -> Double
 aspectRatio cam = fromIntegral (fst $ screenDimensions cam) / fromIntegral (snd $ screenDimensions cam)
