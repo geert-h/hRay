@@ -18,10 +18,10 @@ initialWorld = World initCamera initSpheres initLights
 
 initSpheres :: [Sphere]
 initSpheres =
-  [ Sphere (Vector3 0 0 36) 24 (Material (Color 0 0 0) (Color 1 1 1) Diffuse), -- lightSource
-    Sphere (Vector3 2 0 1) 1 (Material (Color 1 1 1) (Color 0 0 0) Specular),
-    Sphere (Vector3 2 (-3) 1) 1 (Material (Color 1 0 0) (Color 0 0 0) Diffuse),
-    Sphere (Vector3 0 0 (-50)) 50 (Material (Color 0 0 1) (Color 0 0 0) Diffuse)
+  [ Sphere (Vector3 0 0 36) 24 (Material (Color 0 0 0) (Color 1 1 1) Normal), -- lightSource
+    Sphere (Vector3 2 0 1) 1 (Material (Color 1 1 1) (Color 0 0 0) Normal),
+    Sphere (Vector3 2 (-3) 1) 1 (Material (Color 1 0 0) (Color 0 0 0) Normal),
+    Sphere (Vector3 0 0 (-50)) 50 (Material (Color 0 0 1) (Color 0 0 0) Normal)
   ]
 
 initSpheres' :: [Sphere]

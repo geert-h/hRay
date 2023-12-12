@@ -11,5 +11,5 @@ data Material = Material
   }
   deriving (Eq, Show)
 
-data ReflectionType = Diffuse | Specular | Refractive
+data ReflectionType = Diffuse | Specular | Refractive | Normal
   deriving (Eq, Show)

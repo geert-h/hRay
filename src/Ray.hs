@@ -14,22 +14,39 @@ data Ray = Ray
   }
   deriving (Eq, Show)
 
-distanceToSphere :: Sphere -> Ray -> Double
-distanceToSphere (Sphere (Vector3 cx cy cz) radius _) (Ray (Vector3 x y z) (Vector3 dx dy dz))
+distanceToSphere' :: Sphere -> Ray -> Double
+distanceToSphere' (Sphere (Vector3 cx cy cz) radius _) (Ray pos@(Vector3 x y z) dir@(Vector3 dx dy dz))
   | d > 0 = min (max 0 ((-b) + sqrt d / (2 * a))) (max 0 ((-b) - sqrt d / (2 * a)))
   | otherwise = -1
   where
-    a = dx * dx + dy * dy + dz * dz
+    a = dir `dot` dir
     b = 2 * (dx * (x - cx) + dy * (y - cy) + dz * (z - cz))
-    c = (x - cx) * (x - cx) + (y - cy) * (y - cy) + (z - cz) * (z - cz) - (radius * radius)
+    c = ((x - cx) * (x - cx) + (y - cy) * (y - cy) + (z - cz) * (z - cz)) - (radius * radius)
     d = (b * b) - (4 * a * c)
 
+distanceToSphere :: Sphere -> Ray -> Double
+distanceToSphere (Sphere centre radius _) (Ray origin direction) =
+  if det < 0 then -1 else f
+  where
+    eps = 1e-4
+    op = centre - origin -- p - o
+    b = op `dot` direction -- dot op d
+    det = b * b - op `dot` op + radius * radius -- b*b - dot op op + r * r
+    sdet = sqrt det
+    a = b + sdet
+    s = b - sdet
+    f
+      | a > eps = a
+      | s > eps = s
+      | otherwise = -1
+
 cast :: World -> Ray -> Maybe HitInfo
-cast world ray@(Ray position direction) = case foldr closetSphere (Nothing, -1) (spheres world) of
+cast world ray@(Ray origin direction) = case foldr closetSphere (Nothing, -1) (spheres world) of
   (Nothing, _) -> Nothing
-  (Just (Sphere centerPos _ material), dist) -> Just $ HitInfo newPos (normalize (newPos - centerPos)) material
+  (Just (Sphere centerPos _ material), dist) -> Just $ HitInfo newPos newNormal material
     where
-      newPos = position + direction `mulByScalar` dist
+      newPos = origin + direction `mulByScalar` dist
+      newNormal = normalize $ newPos - centerPos
   where
     closetSphere sphere (oldSphere, oldDist)
       | (ndist < oldDist || oldDist < 0) && ndist > 0 = (Just sphere, ndist)
@@ -53,7 +70,9 @@ trace depth world ray@(Ray _ direction) = case cast world ray of
             newTrace <- trace depth' world (Ray hitPos newDir)
             return $ hitEmissionColor + (clr * newTrace)
           Refractive -> do undefined
-    if depth' > 5
+          Normal -> do
+            return $ fromDouble 0.5 * Color (y hitNormal + 1) (y hitNormal + 1) (z hitNormal + 1)
+    if depth' > 1
       then do
         rand <- randomValue
         if rand < pr

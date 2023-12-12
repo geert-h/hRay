@@ -8,9 +8,9 @@ data Vector3 = Vector3
   deriving (Eq, Show)
 
 instance Num Vector3 where
-  (+) v1 v2 = Vector3 (x v1 + x v2) (y v1 + y v2) (z v1 + z v2)
-  (-) v1 v2 = Vector3 (x v1 - x v2) (y v1 - y v2) (z v1 - z v2)
-  (*) v1 v2 = Vector3 (x v1 * x v2) (y v1 * y v2) (z v1 * z v2)
+  (+) (Vector3 x y z) (Vector3 x' y' z') = Vector3 (x + x') (y + y') (z + z')
+  (-) (Vector3 x y z) (Vector3 x' y' z') = Vector3 (x - x') (y - y') (z - z')
+  (*) (Vector3 x y z) (Vector3 x' y' z') = Vector3 (x * x') (y * y') (z * z')
   abs v = Vector3 (abs $ x v) (abs $ y v) (abs $ z v)
   negate v = Vector3 (-x v) (-y v) (-z v)
   signum v = Vector3 (signum $ x v) (signum $ y v) (signum $ z v)
@@ -20,19 +20,19 @@ maxVec :: Vector3 -> Double
 maxVec v = max (x v) (max (y v) (z v))
 
 dot :: Vector3 -> Vector3 -> Double
-l `dot` r = x l * x r + y l * y r + z l * z r
+(Vector3 x y z) `dot` (Vector3 x' y' z') = x * x' + y * y' + z * z'
 
 size :: Vector3 -> Double
-size v = sqrt $ v `dot` v
+size (Vector3 x y z) = sqrt $ x * x + y * y + z * z
 
 cross :: Vector3 -> Vector3 -> Vector3
-l `cross` r = Vector3 (y l * z r - z l * y r) (z l * x r - x l * z r) (x l * y r - y l * x r)
+(Vector3 x y z) `cross` (Vector3 x' y' z') = Vector3 (y * z' - z * y') (z * x' - x * z') (x * y' - y * x')
 
 divByScalar :: Vector3 -> Double -> Vector3
-v `divByScalar` s = Vector3 (x v / s) (y v / s) (z v / s)
+(Vector3 x y z) `divByScalar` s = Vector3 (x / s) (y / s) (z / s)
 
 mulByScalar :: Vector3 -> Double -> Vector3
-v `mulByScalar` s = Vector3 (x v * s) (y v * s) (z v * s)
+(Vector3 x y z) `mulByScalar` s = Vector3 (x * s) (y * s) (z * s)
 
 normalize :: Vector3 -> Vector3
 normalize v = v `divByScalar` size v
