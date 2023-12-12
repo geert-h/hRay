@@ -29,6 +29,7 @@ library
       Color
       HitInfo
       Light
+      Linearisible
       Material
       Ray
       Sphere

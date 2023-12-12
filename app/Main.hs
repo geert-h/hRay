@@ -1,11 +1,14 @@
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+
 module Main (main) where
 
 import Camera
 import Codec.Picture (DynamicImage (ImageRGB8), PixelRGB8, generateImage, savePngImage)
 import Color (Color (Color), colorToRGB8, fromDouble)
 import Data.Foldable (foldrM)
+import Linearisible (Linearisible (..))
 import Ray (Ray (Ray), trace)
-import Vector3 (mulByScalar)
+import Vector3
 import World (World (..), initialWorld)
 
 main :: IO ()
@@ -15,7 +18,7 @@ main = do
 worldToImage :: World -> IO ()
 worldToImage world = do
   let cam = camera world
-  let rayCount = 3
+  let rayCount = 1
   let (imgWidth, imgHeight) = screenDimensions cam
   pixels <-
     sequence
@@ -37,13 +40,13 @@ handlePixel rayCount world@(World cam@(Camera pos _ _ (w, h)) _ _) x y = do
       )
       (Color 0 0 0)
       [0 .. rayCount - 1]
-  pure $ colorToRGB8 $ outputColor * fromDouble (1 / fromIntegral rayCount)
+  pure $ colorToRGB8 $ outputColor ./ fromIntegral rayCount
   where
     a = fromIntegral x / fromIntegral w
     b = fromIntegral y / fromIntegral h
     u = rightTop cam - leftTop cam
     v = leftBottom cam - leftTop cam
-    screenPointer = leftTop cam + u `mulByScalar` a + v `mulByScalar` b
+    screenPointer = leftTop cam + u .* a + v .* b
     direction = screenPointer - position cam
     ray = Ray pos direction
     getIter = do trace 0 world ray

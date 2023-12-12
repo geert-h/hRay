@@ -1,7 +1,8 @@
-module Color (Color (..), colorToRGB8, maxColorValue, divColorByScalar, mulColorByScalar, normalizeColor, fromDouble) where
+module Color (Color (..), colorToRGB8, fromDouble) where
 
 import Codec.Picture (PixelRGB8 (PixelRGB8))
 import Data.Word (Word8)
+import Linearisible (Linearisible (..))
 
 data Color = Color
   { r :: {-# UNPACK #-} !Double,
@@ -19,26 +20,16 @@ instance Num Color where
   signum v = Color (signum $ r v) (signum $ g v) (signum $ b v)
   fromInteger v = Color (fromInteger v) (fromInteger v) (fromInteger v)
 
-maxColorValue :: Color -> Double
-maxColorValue c = max (r c) (max (g c) (b c))
+instance Linearisible Color where
+  maxL c = max (r c) (max (g c) (b c))
+  c ./ s = Color (r c / s) (g c / s) (b c / s)
+  c .* s = Color (r c * s) (g c * s) (b c * s)
+  lc `dot` rc = r lc * r rc + g lc * g rc + b lc * b rc
+  normalize c = c ./ size c
+  size c = sqrt $ c `dot` c
 
 fromDouble :: Double -> Color
 fromDouble v = Color v v v
-
-divColorByScalar :: Color -> Double -> Color
-c `divColorByScalar` s = Color (r c / s) (g c / s) (b c / s)
-
-mulColorByScalar :: Color -> Double -> Color
-c `mulColorByScalar` s = Color (r c * s) (g c * s) (b c * s)
-
-dotColor :: Color -> Color -> Double
-lc `dotColor` rc = r lc * r rc + g lc * g rc + b lc * b rc
-
-size :: Color -> Double
-size c = sqrt $ c `dotColor` c
-
-normalizeColor :: Color -> Color
-normalizeColor c = c `divColorByScalar` size c
 
 colorToRGB8 :: Color -> PixelRGB8
 colorToRGB8 clr = PixelRGB8 (doubleColorValueToWord8 $ r clr) (doubleColorValueToWord8 $ g clr) (doubleColorValueToWord8 $ b clr)
