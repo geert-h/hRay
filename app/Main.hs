@@ -1,14 +1,11 @@
-{-# OPTIONS_GHC -Wno-unused-top-binds #-}
-
 module Main (main) where
 
 import Camera
 import Codec.Picture (DynamicImage (ImageRGB8), PixelRGB8, generateImage, savePngImage)
-import Color (Color (Color), colorToRGB8, fromDouble)
+import Color (Color (Color), colorToRGB8)
 import Data.Foldable (foldrM)
 import Linearisible (Linearisible (..))
 import Ray (Ray (Ray), trace)
-import Vector3
 import World (World (..), initialWorld)
 
 main :: IO ()
@@ -18,7 +15,7 @@ main = do
 worldToImage :: World -> IO ()
 worldToImage world = do
   let cam = camera world
-  let rayCount = 1
+  let rayCount = 3
   let (imgWidth, imgHeight) = screenDimensions cam
   pixels <-
     sequence
@@ -26,9 +23,6 @@ worldToImage world = do
 
   let image = uncurry (generateImage (\x y -> pixels !! y !! x)) (screenDimensions (camera world))
   savePngImage "picture.png" (ImageRGB8 image)
-
-genPixelFromXandYValue :: World -> Int -> Int -> PixelRGB8
-genPixelFromXandYValue _ x y = colorToRGB8 $ Color (fromIntegral x / 1920) (fromIntegral y / 1080) 0
 
 handlePixel :: Int -> World -> Int -> Int -> IO PixelRGB8
 handlePixel rayCount world@(World cam@(Camera pos _ _ (w, h)) _ _) x y = do

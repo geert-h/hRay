@@ -1,4 +1,4 @@
-module Linearisible where
+module Linearisible (Linearisible (..)) where
 
 class Linearisible obj where
   (.*) :: obj -> Double -> obj

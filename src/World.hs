@@ -21,10 +21,12 @@ initCamera = Camera (Vector3 (-3) 0 1) (Vector3 1 0 0) 1 (1280, 720)
 
 initSpheres :: [Sphere]
 initSpheres =
-  [ Sphere (Vector3 0 0 36) 24 (Material (Color 0 0 0) (Color 1 1 1) Diffuse), -- lightSource
-    Sphere (Vector3 0 0 1) 1 (Material (Color 1 1 1) (Color 0 0 0) Specular),
-    Sphere (Vector3 0 (-3) 1) 1 (Material (Color 1 0 0) (Color 0 0 0) Diffuse),
-    Sphere (Vector3 0 0 (-50)) 50 (Material (Color 0 0 1) (Color 0 0 0) Diffuse)
+  [ Sphere (Vector3 0 0 36) 24 (Material 0 (fromDouble 0.999) Diffuse), -- lightSource
+    Sphere (Vector3 0 0 1) 1 (Material (fromDouble 0.999) 0 Specular), -- Specular
+    Sphere (Vector3 0 (-3) 1) 1 (Material (Color 0.999 0 0) 0 Diffuse), --
+    Sphere (Vector3 0 0 (-50)) 50 (Material (Color 0 0 0.999) 0 Diffuse), -- Underground
+    Sphere (Vector3 51 0 0) 49 (Material (Color 0 0.999 0) 0 Diffuse),
+    Sphere (Vector3 0 3 1) 1 (Material (Color 0 0.999 0) 0 Diffuse) -- Refractive
   ]
 
 initSpheres' :: [Sphere]

@@ -1,4 +1,4 @@
-module Sphere where
+module Sphere (Sphere (..)) where
 
 import Material
 import Vector3

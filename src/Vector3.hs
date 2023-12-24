@@ -1,4 +1,4 @@
-module Vector3 where
+module Vector3 (Vector3 (..)) where
 
 import Linearisible (Linearisible (..))
 

@@ -1,4 +1,4 @@
-module Light where
+module Light (Light (..)) where
 
 import Color
 import Vector3
