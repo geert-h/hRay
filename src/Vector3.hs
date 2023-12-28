@@ -14,7 +14,7 @@ instance Num Vector3 where
   (-) (Vector3 x y z) (Vector3 x' y' z') = Vector3 (x - x') (y - y') (z - z')
   (*) (Vector3 x y z) (Vector3 x' y' z') = Vector3 (x * x') (y * y') (z * z')
   abs v = Vector3 (abs $ x v) (abs $ y v) (abs $ z v)
-  negate v = Vector3 (-x v) (-y v) (-z v)
+  negate (Vector3 x y z) = Vector3 (negate x) (negate y) (negate z)
   signum v = Vector3 (signum $ x v) (signum $ y v) (signum $ z v)
   fromInteger v = Vector3 (fromInteger v) (fromInteger v) (fromInteger v)
 

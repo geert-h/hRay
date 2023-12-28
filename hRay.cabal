@@ -48,6 +48,7 @@ library
     , bytestring
     , filepath
     , random
+    , time
   default-language: Haskell2010
 
 executable hRay-exe
@@ -66,6 +67,7 @@ executable hRay-exe
     , filepath
     , hRay
     , random
+    , time
   default-language: Haskell2010
 
 test-suite hRay-test
@@ -85,4 +87,5 @@ test-suite hRay-test
     , filepath
     , hRay
     , random
+    , time
   default-language: Haskell2010

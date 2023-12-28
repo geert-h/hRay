@@ -83,7 +83,7 @@ trace depth world ray@(Ray _ direction) = case cast world ray of
                     rp = re / p
                     tp = tr / (1 - p)
                 newTrace <-
-                  if depth' > 2
+                  if depth > 2
                     then do
                       rand <- randomValue
                       if rand < p

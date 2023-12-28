@@ -25,6 +25,7 @@ dependencies:
   - JuicyPixels
   - bytestring
   - random
+  - time
 
 ghc-options:
   - -Wall

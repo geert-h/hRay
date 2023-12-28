@@ -17,7 +17,7 @@ initialWorld :: World
 initialWorld = World initCamera initSpheres initLights
 
 initCamera :: Camera
-initCamera = Camera (Vector3 (-3) 0 1) (Vector3 1 0 0) 1 (1280, 720)
+initCamera = Camera (Vector3 (-5) 0 1) (Vector3 1 0 0) 1 (1280, 720)
 
 initSpheres :: [Sphere]
 initSpheres =
@@ -26,8 +26,8 @@ initSpheres =
     Sphere (Vector3 0 (-3) 1) 1 (Material (Color 0.999 0 0) 0 Diffuse), --
     Sphere (Vector3 0 0 (-50)) 50 (Material (Color 0 0 0.999) 0 Diffuse), -- Underground
     Sphere (Vector3 51 0 0) 49 (Material (Color 0 0.999 0) 0 Diffuse),
-    Sphere (Vector3 0 3 1) 1 (Material (Color 0 0.999 0) 0 Diffuse) -- Refractive
-  ]
+    Sphere (Vector3 (-2) 0 1) 1 (Material (fromDouble 0.999) 0 Refractive) -- Refractive
+    ]
 
 initSpheres' :: [Sphere]
 initSpheres' =

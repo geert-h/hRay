@@ -15,7 +15,7 @@ main = do
 worldToImage :: World -> IO ()
 worldToImage world = do
   let cam = camera world
-  let rayCount = 3
+  let rayCount = 50
   let (imgWidth, imgHeight) = screenDimensions cam
   pixels <-
     sequence
